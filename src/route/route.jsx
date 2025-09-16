@@ -9,19 +9,19 @@ import LoginPage from "../pages/LoginPage";
 import Welcome from "../pages/Home";
 
 function AppRoute(props) {
-  const isAuthenticated = localStorage.getItem("google_token");
 
   return (
     <Router {...props}>
       <Routes>
         <Route 
           path="/" 
-          element={isAuthenticated ? <Navigate to="/welcome" replace /> : <LoginPage />} 
+          element={<LoginPage />} 
         />
         <Route 
-          path="/welcome/*" 
-          element={isAuthenticated ? <Welcome /> : <Navigate to="/" replace />} 
+          path="/home/*" 
+          element={ <Welcome /> } 
         />
+        
       </Routes>
     </Router>
   );

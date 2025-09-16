@@ -54,6 +54,8 @@ const NoteEditor = ({ open, onClose, note, onSave }) => {
   const [newLabel, setNewLabel] = useState('');
   const [colorAnchorEl, setColorAnchorEl] = useState(null);
   const [labelAnchorEl, setLabelAnchorEl] = useState(null);
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   const [createNote] = useMutation(CREATE_NOTE, {
     refetchQueries: [{ query: GET_NOTES }],
@@ -87,6 +89,8 @@ const NoteEditor = ({ open, onClose, note, onSave }) => {
       setLabels([]);
       setReminderDate('');
       setReminderTime('');
+      setImage(null);
+      setImagePreview(null);
     }
   }, [note]);
 
@@ -101,6 +105,7 @@ const NoteEditor = ({ open, onClose, note, onSave }) => {
         reminder_at: reminderDate && reminderTime 
           ? new Date(`${reminderDate}T${reminderTime}`).toISOString()
           : null,
+        image: imagePreview || null,
       };
 
       if (note) {
@@ -241,9 +246,28 @@ const NoteEditor = ({ open, onClose, note, onSave }) => {
           </Tooltip>
 
           <Tooltip title="Add image">
-            <IconButton size="small">
-              <ImageIcon />
-            </IconButton>
+            <label htmlFor="note-image-upload">
+              <input
+                id="note-image-upload"
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={e => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    setImage(file);
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setImagePreview(reader.result);
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+              />
+              <IconButton size="small" component="span">
+                <ImageIcon />
+              </IconButton>
+            </label>
           </Tooltip>
 
           <Tooltip title="Add label">
@@ -270,6 +294,13 @@ const NoteEditor = ({ open, onClose, note, onSave }) => {
             </IconButton>
           </Tooltip>
         </Box>
+
+        {imagePreview && (
+          <Box sx={{ mb: 2, textAlign: 'center' }}>
+            <img src={imagePreview} alt="Note" style={{ maxWidth: '100%', maxHeight: 200, borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }} />
+            <Button color="error" size="small" onClick={() => { setImage(null); setImagePreview(null); }} sx={{ mt: 1 }}>Remove Image</Button>
+          </Box>
+        )}
 
         {labels.length > 0 && (
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 2 }}>

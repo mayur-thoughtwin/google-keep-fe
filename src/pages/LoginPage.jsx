@@ -1,65 +1,102 @@
 import React, { useEffect } from "react";
 import { Container, Card, CardContent, Typography, Button, Box } from "@mui/material";
 import { useGoogleAuth } from "../hooks/useGoogleAuth";
+import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
   const { handleCallback, login } = useGoogleAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("google_token");
+    if (token) {
+      navigate("/home");
+    }
+  }, [navigate]);
 
   useEffect(() => {
     handleCallback();
   }, [handleCallback]);
 
   return (
-    <Container
-      maxWidth="sm"
+    <Box
       sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #fbbc04 0%, #4285F4 100%)',
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
-      <Card
-        elevation={6}
+      {/* Glassmorphism effect */}
+      <Box
         sx={{
-          borderRadius: 4,
-          padding: 4,
-          textAlign: "center",
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          zIndex: 0,
+          backdropFilter: 'blur(8px)',
+          opacity: 0.7,
+        }}
+      />
+      <Card
+        elevation={12}
+        sx={{
+          borderRadius: 6,
+          padding: 5,
+          textAlign: 'center',
+          minWidth: 350,
+          maxWidth: 400,
+          zIndex: 1,
+          background: 'rgba(255,255,255,0.25)',
+          boxShadow: '0 8px 32px 0 rgba(66,133,244,0.25)',
+          backdropFilter: 'blur(12px)',
+          border: '1px solid rgba(255,255,255,0.18)',
+          transition: 'box-shadow 0.3s',
         }}
       >
         <CardContent>
-          <Typography variant="h4" fontWeight="bold" gutterBottom>
+          <Box sx={{ mb: 2 }}>
+            <img src="https://www.gstatic.com/images/branding/product/1x/keep_2020q4_48dp.png" alt="Keep" style={{ width: 56, height: 56, marginBottom: 8 }} />
+          </Box>
+          <Typography variant="h3" fontWeight="bold" gutterBottom sx={{ color: '#222', letterSpacing: 1, mb: 1 }}>
             Welcome Back 👋
           </Typography>
-          <Typography variant="body1" color="text.secondary" gutterBottom>
+          <Typography variant="body1" color="text.secondary" gutterBottom sx={{ fontSize: 18 }}>
             Sign in with Google to continue
           </Typography>
-
-          <Box mt={4}>
+          <Box mt={5}>
             <Button
               onClick={login}
               variant="contained"
               fullWidth
               sx={{
-                backgroundColor: "#4285F4",
-                textTransform: "none",
-                fontWeight: "bold",
-                fontSize: "16px",
-                padding: "10px 20px",
-                borderRadius: "12px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-                "&:hover": {
-                  backgroundColor: "#357ae8",
+                background: 'linear-gradient(90deg, #4285F4 60%, #fbbc04 100%)',
+                color: '#fff',
+                textTransform: 'none',
+                fontWeight: 'bold',
+                fontSize: '18px',
+                padding: '12px 24px',
+                borderRadius: '16px',
+                boxShadow: '0 4px 16px 0 rgba(66,133,244,0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '10px',
+                transition: 'box-shadow 0.2s',
+                '&:hover': {
+                  background: 'linear-gradient(90deg, #357ae8 60%, #ffe066 100%)',
+                  boxShadow: '0 8px 32px 0 rgba(251,188,4,0.25)',
                 },
               }}
             >
-              {/* Google SVG icon */}
               <svg
                 viewBox="0 0 24 24"
-                style={{ width: 22, height: 22 }}
+                style={{ width: 26, height: 26 }}
               >
                 <path
                   fill="#4285F4"
@@ -91,7 +128,7 @@ const LoginPage = () => {
           </Box>
         </CardContent>
       </Card>
-    </Container>
+    </Box>
   );
 };
 

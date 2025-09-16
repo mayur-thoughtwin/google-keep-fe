@@ -9,18 +9,14 @@ export function useGoogleAuth() {
     const authUrl = `${googleConfig.authEndpoint}?client_id=${googleConfig.clientId}&redirect_uri=${googleConfig.redirectUri}&response_type=${googleConfig.responseType}&scope=${encodeURIComponent(googleConfig.scope)}`;
     window.location.href = authUrl;
   }, []);
-  console.log("Google Config:", googleConfig);
-  console.log("authUrl:", `${googleConfig.authEndpoint}?client_id=${googleConfig.clientId}&redirect_uri=${googleConfig.redirectUri}&response_type=${googleConfig.responseType}&scope=${encodeURIComponent(googleConfig.scope)}`);
   // Handle OAuth callback
   const handleCallback = useCallback(() => {
-    
-    const params = new URLSearchParams(window.location.search);
-    console.log("URL Params:", params.toString());
-    const token = params.get("token");
+
+    const token = new URLSearchParams(window.location.search).get("token");
     console.log("OAuth token:", token);
     if (token) {
       localStorage.setItem("google_token", token);
-      navigate("/welcome");
+      // navigate("/welcome");
     }
   }, [navigate]);
 

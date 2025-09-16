@@ -104,8 +104,8 @@ const Layout = ({ children, onRefresh, onSearch, onViewToggle, viewMode, onAddNo
   };
 
   const handleViewChange = (view) => {
-    setCurrentView(view);
-    navigate(`/${view}`);
+  setCurrentView(view);
+  navigate(`/home/${view}`);
   };
 
   const sidebarItems = [
@@ -178,7 +178,7 @@ const Layout = ({ children, onRefresh, onSearch, onViewToggle, viewMode, onAddNo
         <Divider sx={{ mb: 2 }} />
         <List>
           <ListItem disablePadding>
-            <ListItemButton onClick={() => navigate('/settings')}>
+            <ListItemButton onClick={() => navigate('/home/settings')}>
               <ListItemIcon sx={{ minWidth: 40 }}>
                 <SettingsOutlined />
               </ListItemIcon>
@@ -199,16 +199,43 @@ const Layout = ({ children, onRefresh, onSearch, onViewToggle, viewMode, onAddNo
   );
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        width: '100vw',
+        overflow: 'hidden',
+        position: 'relative',
+        background: settings?.is_dark_theme
+          ? 'linear-gradient(135deg, #232526 0%, #202124 100%)'
+          : 'linear-gradient(135deg, #fbbc04 0%, #4285F4 100%)',
+        transition: 'background 0.3s',
+        display: 'flex',
+      }}
+    >
+      {/* Glassmorphism overlay */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 0,
+          backdropFilter: 'blur(8px)',
+          opacity: 0.6,
+        }}
+      />
       <AppBar
         position="fixed"
         sx={{
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           ml: { sm: `${drawerWidth}px` },
-          backgroundColor: 'white',
-          color: 'black',
-          boxShadow: 'none',
-          borderBottom: '1px solid #e0e0e0',
+          background: 'rgba(255,255,255,0.25)',
+          color: '#222',
+          boxShadow: '0 8px 32px 0 rgba(66,133,244,0.15)',
+          borderBottom: '1px solid rgba(255,255,255,0.18)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 2,
         }}
       >
         <Toolbar>
@@ -221,20 +248,18 @@ const Layout = ({ children, onRefresh, onSearch, onViewToggle, viewMode, onAddNo
           >
             <MenuIcon />
           </IconButton>
-
           <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
             <img
               src="https://www.gstatic.com/images/branding/product/1x/keep_2020q4_48dp.png"
               alt="Keep"
-              style={{ width: 40, height: 40, marginRight: 16 }}
+              style={{ width: 44, height: 44, marginRight: 18 }}
             />
-            <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 'bold' }}>
+            <Typography variant="h5" noWrap component="div" sx={{ fontWeight: 'bold', letterSpacing: 1 }}>
               Keep
             </Typography>
           </Box>
-
           <TextField
-            placeholder="Search"
+            placeholder="Search notes..."
             variant="outlined"
             size="small"
             value={searchQuery}
@@ -245,7 +270,8 @@ const Layout = ({ children, onRefresh, onSearch, onViewToggle, viewMode, onAddNo
               mx: 2,
               '& .MuiOutlinedInput-root': {
                 borderRadius: '25px',
-                backgroundColor: '#f1f3f4',
+                background: 'rgba(255,255,255,0.5)',
+                boxShadow: '0 2px 8px rgba(66,133,244,0.08)',
                 '& fieldset': {
                   border: 'none',
                 },
@@ -265,40 +291,34 @@ const Layout = ({ children, onRefresh, onSearch, onViewToggle, viewMode, onAddNo
               ),
             }}
           />
-
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Tooltip title="Refresh">
               <IconButton onClick={onRefresh}>
                 <RefreshIcon />
               </IconButton>
             </Tooltip>
-
             <Tooltip title={viewMode === 'grid' ? 'List view' : 'Grid view'}>
               <IconButton onClick={onViewToggle}>
                 {viewMode === 'grid' ? <ListIcon /> : <GridIcon />}
               </IconButton>
             </Tooltip>
-
             <Tooltip title="Google apps">
               <IconButton>
                 <AppsIcon />
               </IconButton>
             </Tooltip>
-
             <Tooltip title="Theme">
               <IconButton onClick={handleThemeToggle}>
                 {settings?.is_dark_theme ? <LightModeOutlined /> : <DarkModeOutlined />}
               </IconButton>
             </Tooltip>
-
             <IconButton onClick={handleProfileMenuOpen}>
               <Avatar
                 src={user?.picture}
                 alt={user?.name}
-                sx={{ width: 32, height: 32 }}
+                sx={{ width: 36, height: 36, boxShadow: '0 2px 8px rgba(66,133,244,0.12)' }}
               />
             </IconButton>
-
             <Menu
               anchorEl={anchorEl}
               open={Boolean(anchorEl)}
@@ -315,10 +335,9 @@ const Layout = ({ children, onRefresh, onSearch, onViewToggle, viewMode, onAddNo
           </Box>
         </Toolbar>
       </AppBar>
-
       <Box
         component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 }, zIndex: 3 }}
       >
         <Drawer
           variant="temporary"
@@ -329,7 +348,13 @@ const Layout = ({ children, onRefresh, onSearch, onViewToggle, viewMode, onAddNo
           }}
           sx={{
             display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
+              width: drawerWidth,
+              background: 'rgba(255,255,255,0.7)',
+              backdropFilter: 'blur(8px)',
+              boxShadow: '0 4px 24px 0 rgba(251,188,4,0.12)',
+            },
           }}
         >
           {drawer}
@@ -338,23 +363,33 @@ const Layout = ({ children, onRefresh, onSearch, onViewToggle, viewMode, onAddNo
           variant="permanent"
           sx={{
             display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
+              width: drawerWidth,
+              background: 'rgba(255,255,255,0.7)',
+              backdropFilter: 'blur(8px)',
+              boxShadow: '0 4px 24px 0 rgba(251,188,4,0.12)',
+            },
           }}
           open
         >
           {drawer}
         </Drawer>
       </Box>
-
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
+          p: { xs: 1, sm: 3 },
           width: { sm: `calc(100% - ${drawerWidth}px)` },
-          mt: 8,
-          backgroundColor: settings?.is_dark_theme ? '#202124' : '#fafafa',
+          mt: 10,
           minHeight: '100vh',
+          zIndex: 1,
+          position: 'relative',
+          background: 'rgba(255,255,255,0.15)',
+          borderRadius: { xs: 0, sm: 6 },
+          boxShadow: '0 4px 24px 0 rgba(66,133,244,0.08)',
+          transition: 'background 0.3s',
         }}
       >
         {children}
