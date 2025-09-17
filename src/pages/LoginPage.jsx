@@ -23,9 +23,10 @@ const LoginPage = () => {
       sx={{
         minHeight: '100vh',
         display: 'flex',
+        margin: 0,
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #fbbc04 0%, #4285F4 100%)',
+        // background: 'linear-gradient(135deg, #fbbc04 0%, #4285F4 100%)',
         position: 'relative',
         overflow: 'hidden',
       }}
@@ -129,6 +130,7 @@ const LoginPage = () => {
         </CardContent>
       </Card>
     </Box>
+    
   );
 };
 

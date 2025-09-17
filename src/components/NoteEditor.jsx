@@ -105,7 +105,7 @@ const NoteEditor = ({ open, onClose, note, onSave }) => {
         reminder_at: reminderDate && reminderTime 
           ? new Date(`${reminderDate}T${reminderTime}`).toISOString()
           : null,
-        image: imagePreview || null,
+        bg_image: imagePreview || null,
       };
 
       if (note) {
