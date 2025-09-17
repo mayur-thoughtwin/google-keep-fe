@@ -33,7 +33,6 @@ import {
   AccessTime as ReminderIcon,
   Palette as ColorIcon,
   Image as ImageIcon,
-  PersonAdd as PersonAddIcon,
   MoreOutlined as MoreIcon,
 } from '@mui/icons-material';
 import { UPDATE_NOTE, DELETE_OR_RESTORE_NOTE, ASSIGN_LABEL } from '../graphql/mutations';
@@ -44,8 +43,10 @@ const NoteCard = ({ note, onEdit, onPin, onArchive, onDelete, onColorChange, onL
   const [anchorEl, setAnchorEl] = useState(null);
   const [labelDialogOpen, setLabelDialogOpen] = useState(false);
   const [colorDialogOpen, setColorDialogOpen] = useState(false);
+  const [reminderDialogOpen, setReminderDialogOpen] = useState(false);
   const [selectedLabel, setSelectedLabel] = useState('');
-  const [newLabel, setNewLabel] = useState('');
+  const [reminderDate, setReminderDate] = useState('');
+  const [reminderTime, setReminderTime] = useState('');
 
   const [updateNote] = useMutation(UPDATE_NOTE, {
     refetchQueries: [{ query: GET_NOTES }],
@@ -308,11 +309,18 @@ const NoteCard = ({ note, onEdit, onPin, onArchive, onDelete, onColorChange, onL
           </ListItemText>
         </MenuItem>
 
-        <MenuItem onClick={() => setColorDialogOpen(true)}>
+                <MenuItem onClick={() => setColorDialogOpen(true)}>
           <ListItemIcon>
             <ColorIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Change color</ListItemText>
+          <ListItemText primary="Change color" />
+        </MenuItem>
+
+        <MenuItem onClick={() => setReminderDialogOpen(true)}>
+          <ListItemIcon>
+            <ReminderIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText primary="Add reminder" />
         </MenuItem>
 
         <MenuItem onClick={() => setLabelDialogOpen(true)}>
@@ -372,6 +380,52 @@ const NoteCard = ({ note, onEdit, onPin, onArchive, onDelete, onColorChange, onL
           <Button onClick={() => setLabelDialogOpen(false)}>Cancel</Button>
           <Button onClick={handleLabelAssign} variant="contained">
             Add
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Reminder Dialog */}
+      <Dialog open={reminderDialogOpen} onClose={() => setReminderDialogOpen(false)}>
+        <DialogTitle>Add reminder</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+            <TextField
+              type="date"
+              label="Date"
+              value={reminderDate}
+              onChange={(e) => setReminderDate(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              fullWidth
+            />
+            <TextField
+              type="time"
+              label="Time"
+              value={reminderTime}
+              onChange={(e) => setReminderTime(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              fullWidth
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setReminderDialogOpen(false)}>Cancel</Button>
+          <Button
+            onClick={() => {
+              const reminderDateTime = new Date(reminderDate + 'T' + reminderTime);
+              updateNote({
+                variables: {
+                  noteId: parseFloat(note.id),
+                  data: {
+                    reminder_at: reminderDateTime.toISOString(),
+                    is_reminder: true,
+                  },
+                },
+              });
+              setReminderDialogOpen(false);
+            }}
+            variant="contained"
+          >
+            Set Reminder
           </Button>
         </DialogActions>
       </Dialog>

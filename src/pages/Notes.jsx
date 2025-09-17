@@ -41,11 +41,10 @@ const Notes = () => {
     fetchPolicy: 'cache-and-network',
   });
 
-  const notes = data?.getNotes?.notes || [];
-
   useEffect(() => {
-    if (notes) {
-      let filtered = notes.filter(note => !note.is_archived && !note.deleted_at);
+    const currentNotes = data?.getNotes?.notes || [];
+    if (currentNotes.length > 0) {
+      let filtered = currentNotes.filter(note => !note.is_archived && !note.deleted_at);
       
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
@@ -61,10 +60,15 @@ const Notes = () => {
       
       setFilteredNotes(filtered);
     }
-  }, [notes, searchQuery]);
+  }, [data, searchQuery]);
 
   const handleSearch = (query) => {
     setSearchQuery(query);
+    // Debounce the search to avoid too many network requests
+    clearTimeout(window.searchTimeout);
+    window.searchTimeout = setTimeout(() => {
+      refetch({ query }); // Refetch with new query
+    }, 300);
   };
 
   const handleRefresh = () => {
