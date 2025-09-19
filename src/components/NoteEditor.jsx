@@ -233,11 +233,11 @@ const NoteEditor = ({ open, onClose, note, onSave }) => {
         />
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-          <Tooltip title="Add reminder">
+           {/* <Tooltip title="Add reminder" >
             <IconButton size="small">
               <ReminderIcon />
             </IconButton>
-          </Tooltip>
+          </Tooltip> */}
 
           <Tooltip title="Collaborator">
             <IconButton size="small">
@@ -356,7 +356,7 @@ const NoteEditor = ({ open, onClose, note, onSave }) => {
               onClick={handleSave}
               disabled={!description.trim()}
             >
-              {note ? 'Save' : 'Close'}
+              {note ? 'Save' : 'Save'}
             </Button>
           </Box>
         </Box>

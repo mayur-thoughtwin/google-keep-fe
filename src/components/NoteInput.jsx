@@ -49,7 +49,8 @@ const NoteInput = ({ onSave, onClose, expanded, onExpand }) => {
     <Paper
       elevation={expanded ? 8 : 2}
       sx={{
-        borderRadius: 2,
+        borderRadius: 5,
+        marginInline: 10,
         backgroundColor: bgColor,
         transition: 'all 0.2s ease',
         cursor: expanded ? 'default' : 'pointer',
@@ -61,8 +62,8 @@ const NoteInput = ({ onSave, onClose, expanded, onExpand }) => {
     >
       <Box sx={{ p: 2 }}>
         <TextField
-          fullWidth
-          placeholder={expanded ? "Title" : "Take a note..."}
+          // fullWidth
+          placeholder={expanded ? "Title" : "Take a noteeee..."}
           value={expanded ? title : (title || description)}
           onChange={(e) => {
             if (expanded) {

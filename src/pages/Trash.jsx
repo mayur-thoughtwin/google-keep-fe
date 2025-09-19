@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import { DeleteForever as EmptyIcon } from '@mui/icons-material';
 import { GET_NOTES } from '../graphql/queries';
-import { EMPTY_TRASH as EMPTY_TRASH_MUTATION } from '../graphql/mutations';
+import { EMPTY_TRASH as EMPTY_TRASH_MUTATION, DELETE_OR_RESTORE_NOTE } from '../graphql/mutations';
 import Layout from '../components/Layout';
 import NoteCard from '../components/NoteCard';
 import { useMutation, useQuery } from '@apollo/client/react';
@@ -31,9 +31,12 @@ const Trash = () => {
     refetchQueries: [{ query: GET_NOTES, variables: { type: 'trash' } }],
   });
 
-  const notes = data?.getNotes?.notes || [];
+  const [deleteOrRestoreNote] = useMutation(DELETE_OR_RESTORE_NOTE, {
+    refetchQueries: [{ query: GET_NOTES, variables: { type: 'trash' } }],
+  });
 
   useEffect(() => {
+    const notes = data?.getNotes?.notes || [];
     if (notes) {
       // Filter deleted notes
       const filtered = notes.filter(note => note.deleted_at);
@@ -42,7 +45,7 @@ const Trash = () => {
       filtered.sort((a, b) => new Date(b.deleted_at) - new Date(a.deleted_at));
       setFilteredNotes(filtered);
     }
-  }, [notes]);
+  }, [data?.getNotes?.notes]);
 
   // Handle empty trash mutation
   const handleEmptyTrash = async () => {
@@ -51,9 +54,18 @@ const Trash = () => {
       setEmptyDialogOpen(false);
       refetch();
     } catch (err) {
-      // Optionally handle error
-      // eslint-disable-next-line no-console
       console.error('Failed to empty trash:', err);
+    }
+  };
+
+  const handleRestoreNote = async (noteId) => {
+    try {
+      await deleteOrRestoreNote({
+        variables: { noteId: parseFloat(noteId) }
+      });
+      refetch();
+    } catch (err) {
+      console.error('Failed to restore note:', err);
     }
   };
 
@@ -118,7 +130,11 @@ const Trash = () => {
           <Grid container spacing={2}>
             {filteredNotes.map((note) => (
               <Grid item key={note.id} xs={12} sm={6} md={4} lg={3}>
-                <NoteCard note={note} isTrash />
+                <NoteCard 
+                  note={note} 
+                  isTrash 
+                  onRestore={() => handleRestoreNote(note.id)}
+                />
               </Grid>
             ))}
           </Grid>
