@@ -1,46 +1,46 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Grid, Alert, CircularProgress } from "@mui/material";
-import { GET_NOTES } from "../graphql/queries";
+import {
+  Box,
+  Typography,
+  Grid,
+  Alert,
+  CircularProgress,
+} from "@mui/material";
 import Layout from "../components/Layout";
 import NoteCard from "../components/NoteCard";
 import NoteEditor from "../components/NoteEditor";
+import { GET_NOTES_BY_LABEL_ID } from "../graphql/queries";
 import { useQuery } from "@apollo/client/react";
+import { useParams } from "react-router-dom"; // 👈 import useParams
 
-const Archive = () => {
+const LabelNotes = () => {
+  const { labelId } = useParams(); // 👈 get it from the URL
   const [filteredNotes, setFilteredNotes] = useState([]);
   const [editorOpen, setEditorOpen] = useState(false);
-  const [selectedNote, setSelectedNote] = useState(null);
+  const [editorNote, setEditorNote] = useState(null);
 
-  const { data, loading, error, refetch } = useQuery(GET_NOTES, {
-    variables: { type: "archive" },
+  const { data, loading, error, refetch } = useQuery(GET_NOTES_BY_LABEL_ID, {
+    variables: { labelId: parseFloat(labelId) }, // 👈 use it here
     fetchPolicy: "cache-and-network",
+    skip: !labelId, // avoid running if labelId is undefined
   });
 
-  const notes = data?.getNotes?.notes || [];
-
   useEffect(() => {
+    const notes = data?.getNotesByLabelId?.notes || [];
     if (notes) {
-      // Filter archived notes that are not deleted
-      const filtered = notes.filter(
-        (note) => note.is_archived && !note.deleted_at
-      );
-
-      filtered.sort(
-        (a, b) => new Date(b.archived_at) - new Date(a.archived_at)
-      );
-
-      setFilteredNotes(filtered);
+      setFilteredNotes(notes);
     }
-  }, [notes]);
+  }, [data?.getNotesByLabelId?.notes]);
 
+  // editor handlers
   const handleEditNote = (note) => {
-    setSelectedNote(note);
+    setEditorNote(note);
     setEditorOpen(true);
   };
 
   const handleEditorClose = () => {
     setEditorOpen(false);
-    setSelectedNote(null);
+    setEditorNote(null);
   };
 
   const handleNoteSave = () => {
@@ -55,7 +55,7 @@ const Archive = () => {
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            minHeight: 400,
+            minHeight: 300,
           }}
         >
           <CircularProgress />
@@ -68,7 +68,7 @@ const Archive = () => {
     return (
       <Layout>
         <Alert severity="error" sx={{ m: 2 }}>
-          Error loading archive: {error.message}
+          Error loading notes: {error.message}
         </Alert>
       </Layout>
     );
@@ -77,9 +77,18 @@ const Archive = () => {
   return (
     <Layout>
       <Box sx={{ maxWidth: 1200, mx: "auto" }}>
-        <Typography variant="h5" gutterBottom sx={{ mb: 3, fontWeight: 500 }}>
-          Archive
-        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 3,
+          }}
+        >
+          <Typography variant="h5" sx={{ fontWeight: 500 }}>
+            Notes with Label #{labelId}
+          </Typography>
+        </Box>
 
         {filteredNotes.length === 0 ? (
           <Box
@@ -93,27 +102,30 @@ const Archive = () => {
             }}
           >
             <Typography variant="h6" gutterBottom>
-              Archive is empty
+              No notes found for this label
             </Typography>
             <Typography variant="body2">
-              Notes you archive will appear here
+              Notes with this label will appear here
             </Typography>
           </Box>
         ) : (
           <Grid container spacing={2}>
             {filteredNotes.map((note) => (
               <Grid item key={note.id} xs={12} sm={6} md={4} lg={3}>
-                <NoteCard note={note} onEdit={handleEditNote} />
+                <NoteCard
+                  note={note}
+                  onEdit={() => handleEditNote(note)}
+                />
               </Grid>
             ))}
           </Grid>
         )}
 
-        {/* Note Editor Modal */}
+        {/* Note Editor */}
         <NoteEditor
           open={editorOpen}
           onClose={handleEditorClose}
-          note={selectedNote}
+          note={editorNote}
           onSave={handleNoteSave}
         />
       </Box>
@@ -121,4 +133,4 @@ const Archive = () => {
   );
 };
 
-export default Archive;
+export default LabelNotes;

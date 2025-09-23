@@ -196,7 +196,8 @@ const NoteCard = ({
   return (
     <>
       <Card
-      onClick={() => onEdit?.(note)}
+        // want in edit in archive trash and reminder
+        onClick={() => onEdit?.(note)}
         sx={{
           width: 220, // fixed width
           height: 100, // fixed height (constant for all cards)
@@ -206,7 +207,7 @@ const NoteCard = ({
           transition: "all 0.3s cubic-bezier(.25,.8,.25,1)",
           cursor: "pointer",
           position: "relative",
-          overflow: "hidden", 
+          overflow: "hidden",
           "&:hover": {
             boxShadow:
               "0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22)",
@@ -224,7 +225,11 @@ const NoteCard = ({
                 fontSize: "1rem",
                 fontWeight: 500,
                 mb: 1,
-                wordBreak: "break-word",
+                display: "-webkit-box",
+                WebkitLineClamp: 1, // 👈 only 1 line for title
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
               }}
             >
               {note.title}
@@ -235,8 +240,11 @@ const NoteCard = ({
             variant="body2"
             sx={{
               color: "text.secondary",
-              wordBreak: "break-word",
-              whiteSpace: "pre-wrap",
+              display: "-webkit-box",
+              WebkitLineClamp: 1,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
               mb: 1,
             }}
           >

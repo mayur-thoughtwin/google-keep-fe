@@ -75,11 +75,11 @@ const NoteEditor = ({ open, onClose, note, onSave }) => {
       setIsPinned(note.is_pinned || false);
       setIsArchived(note.is_archived || false);
       setLabels(note.labelNames || []);
-      if (note.reminder_at) {
+      // if (note.reminder_at) {
         const reminder = new Date(note.reminder_at);
         setReminderDate(reminder.toISOString().split('T')[0]);
         setReminderTime(reminder.toTimeString().slice(0, 5));
-      }
+      // }
     } else {
       setTitle('');
       setDescription('');
@@ -105,7 +105,6 @@ const NoteEditor = ({ open, onClose, note, onSave }) => {
         reminder_at: reminderDate && reminderTime 
           ? new Date(`${reminderDate}T${reminderTime}`).toISOString()
           : null,
-        bg_image: imagePreview || null,
       };
 
       if (note) {
@@ -113,6 +112,7 @@ const NoteEditor = ({ open, onClose, note, onSave }) => {
           variables: {
             noteId: parseFloat(note.id),
             data: noteData,
+            bg_image: image,
           },
         });
       } else {

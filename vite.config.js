@@ -11,5 +11,9 @@ export default defineConfig({
     commonjsOptions: {
       include: [/node_modules/]
     }
+  },
+  server: {
+    port: 5000,       // 👈 set dev server port
+    open: true,       // optional: opens browser automatically
   }
 })

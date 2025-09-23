@@ -140,12 +140,12 @@ const Notes = () => {
         <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
         {/* Take a note input */}
         <Box sx={{ mb: 3 }}>
-          <NoteInput
+          {/* <NoteInput
             expanded={inputExpanded}
             onExpand={() => setInputExpanded(true)}
             onClose={() => setInputExpanded(false)}
             onSave={handleQuickSave}
-          />
+          /> */}
         </Box>
 
         {/* Notes Grid/List */}
