@@ -90,7 +90,7 @@ export const GET_LABELS = gql`
 // Notes by Label id query
 export const GET_NOTES_BY_LABEL_ID = gql`
   query GetNotesByLabelId($labelId: Float!) {
-    notes {
+    getNotesByLabelId(labelId: $labelId) {
       id
       user_id
       title

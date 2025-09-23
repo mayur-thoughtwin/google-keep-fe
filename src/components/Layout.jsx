@@ -63,12 +63,8 @@ const Layout = ({ children, onRefresh, onSearch, onViewToggle, viewMode }) => {
 
   const currentView = location.pathname.split('/').pop();
 
-  // Debounced search function
-  const debouncedSearch = useRef(
-    debounce((query) => {
-      onSearch(query);
-    }, 1000)
-  ).current;
+  // Real-time search (no debounce): call on every keystroke
+  const debouncedSearch = useRef((query) => onSearch(query)).current;
 
   useEffect(() => {
     return () => debouncedSearch.cancel();
@@ -76,8 +72,8 @@ const Layout = ({ children, onRefresh, onSearch, onViewToggle, viewMode }) => {
 
   const handleSearchChange = (event) => {
     const value = event.target.value;
-    setSearchQuery(value); // local state keeps input stable
-    debouncedSearch(value); // debounced API call
+    setSearchQuery(value);
+    debouncedSearch(value);
   };
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);

@@ -25,7 +25,7 @@ export default function Welcome() {
       <Route path="archive" element={<Archive />} />
       <Route path="trash" element={<Trash />} />
       <Route path="settings" element={<Settings />} />
-      <Route path="/home/labels/:labelId" element={<LabelNotes />} />
+      <Route path="labels/:labelId" element={<LabelNotes />} />
     </Routes>
   );
 }

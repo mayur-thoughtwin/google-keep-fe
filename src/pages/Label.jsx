@@ -30,7 +30,7 @@ const LabelNotes = () => {
     if (notes) {
       setFilteredNotes(notes);
     }
-  }, [data?.getNotesByLabelId?.notes]);
+  }, [data]);
 
   // editor handlers
   const handleEditNote = (note) => {

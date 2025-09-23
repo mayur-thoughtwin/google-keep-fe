@@ -54,8 +54,10 @@ const NoteEditor = ({ open, onClose, note, onSave }) => {
   const [newLabel, setNewLabel] = useState('');
   const [colorAnchorEl, setColorAnchorEl] = useState(null);
   const [labelAnchorEl, setLabelAnchorEl] = useState(null);
-  const [image, setImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [bgImageFile, setBgImageFile] = useState(null);
+  const [bgImagePreview, setBgImagePreview] = useState(null);
+  const [imagesFiles, setImagesFiles] = useState([]);
+  const [imagesPreviews, setImagesPreviews] = useState([]);
 
   const [createNote] = useMutation(CREATE_NOTE, {
     refetchQueries: [{ query: GET_NOTES }],
@@ -80,6 +82,11 @@ const NoteEditor = ({ open, onClose, note, onSave }) => {
         setReminderDate(reminder.toISOString().split('T')[0]);
         setReminderTime(reminder.toTimeString().slice(0, 5));
       // }
+      setBgImagePreview(note.bg_image || null);
+      const existingImages = (note.files || [])
+        .filter((f) => f.type === 'image')
+        .map((f) => f.url);
+      setImagesPreviews(existingImages);
     } else {
       setTitle('');
       setDescription('');
@@ -89,8 +96,10 @@ const NoteEditor = ({ open, onClose, note, onSave }) => {
       setLabels([]);
       setReminderDate('');
       setReminderTime('');
-      setImage(null);
-      setImagePreview(null);
+      setBgImageFile(null);
+      setBgImagePreview(null);
+      setImagesFiles([]);
+      setImagesPreviews([]);
     }
   }, [note]);
 
@@ -112,13 +121,16 @@ const NoteEditor = ({ open, onClose, note, onSave }) => {
           variables: {
             noteId: parseFloat(note.id),
             data: noteData,
-            bg_image: image,
+            bg_image: bgImageFile,
+            images: imagesFiles,
           },
         });
       } else {
         await createNote({
           variables: {
             createNoteInput: noteData,
+            bg_image: bgImageFile,
+            images: imagesFiles,
           },
         });
       }
@@ -245,22 +257,50 @@ const NoteEditor = ({ open, onClose, note, onSave }) => {
             </IconButton>
           </Tooltip>
 
-          <Tooltip title="Add image">
-            <label htmlFor="note-image-upload">
+          <Tooltip title="Add background image">
+            <label htmlFor="note-bg-image-upload">
               <input
-                id="note-image-upload"
+                id="note-bg-image-upload"
                 type="file"
                 accept="image/*"
                 style={{ display: 'none' }}
                 onChange={e => {
                   const file = e.target.files[0];
                   if (file) {
-                    setImage(file);
+                    setBgImageFile(file);
                     const reader = new FileReader();
                     reader.onloadend = () => {
-                      setImagePreview(reader.result);
+                      setBgImagePreview(reader.result);
                     };
                     reader.readAsDataURL(file);
+                  }
+                }}
+              />
+              <IconButton size="small" component="span">
+                <ImageIcon />
+              </IconButton>
+            </label>
+          </Tooltip>
+
+          <Tooltip title="Add images">
+            <label htmlFor="note-images-upload">
+              <input
+                id="note-images-upload"
+                type="file"
+                accept="image/*"
+                multiple
+                style={{ display: 'none' }}
+                onChange={e => {
+                  const files = Array.from(e.target.files || []);
+                  if (files.length) {
+                    setImagesFiles(prev => [...prev, ...files]);
+                    files.forEach((file) => {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setImagesPreviews(prev => [...prev, reader.result]);
+                      };
+                      reader.readAsDataURL(file);
+                    });
                   }
                 }}
               />
@@ -295,10 +335,31 @@ const NoteEditor = ({ open, onClose, note, onSave }) => {
           </Tooltip>
         </Box>
 
-        {imagePreview && (
+        {bgImagePreview && (
           <Box sx={{ mb: 2, textAlign: 'center' }}>
-            <img src={imagePreview} alt="Note" style={{ maxWidth: '100%', maxHeight: 200, borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }} />
-            <Button color="error" size="small" onClick={() => { setImage(null); setImagePreview(null); }} sx={{ mt: 1 }}>Remove Image</Button>
+            <img src={bgImagePreview} alt="Background" style={{ width: '100%', maxHeight: 220, objectFit: 'cover', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }} />
+            <Button color="error" size="small" onClick={() => { setBgImageFile(null); setBgImagePreview(null); }} sx={{ mt: 1 }}>Remove background</Button>
+          </Box>
+        )}
+
+        {imagesPreviews.length > 0 && (
+          <Box sx={{ mb: 2, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 1 }}>
+            {imagesPreviews.map((src, idx) => (
+              <Box key={idx} sx={{ position: 'relative' }}>
+                <img src={src} alt={`Attachment ${idx + 1}`} style={{ width: '100%', height: 120, objectFit: 'cover', borderRadius: 6, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }} />
+                <Button
+                  color="error"
+                  size="small"
+                  onClick={() => {
+                    setImagesPreviews(prev => prev.filter((_, i) => i !== idx));
+                    setImagesFiles(prev => prev.filter((_, i) => i !== idx));
+                  }}
+                  sx={{ mt: 0.5 }}
+                >
+                  Remove
+                </Button>
+              </Box>
+            ))}
           </Box>
         )}
 

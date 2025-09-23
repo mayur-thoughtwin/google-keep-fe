@@ -39,6 +39,7 @@ const Notes = () => {
   const { data, loading, error, refetch } = useQuery(GET_NOTES, {
     variables: { type: null, query: searchQuery },
     fetchPolicy: 'cache-and-network',
+    notifyOnNetworkStatusChange: true,
   });
 
   useEffect(() => {
@@ -64,11 +65,7 @@ const Notes = () => {
 
   const handleSearch = (query) => {
     setSearchQuery(query);
-    // Debounce the search to avoid too many network requests
-    clearTimeout(window.searchTimeout);
-    window.searchTimeout = setTimeout(() => {
-      refetch({ query }); // Refetch with new query
-    }, 300);
+    refetch({ query });
   };
 
   const handleRefresh = () => {
