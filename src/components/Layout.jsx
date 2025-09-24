@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Drawer,
@@ -63,11 +64,19 @@ const Layout = ({ children, onRefresh, onSearch, onViewToggle, viewMode }) => {
 
   const currentView = location.pathname.split('/').pop();
 
-  // Real-time search (no debounce): call on every keystroke
-  const debouncedSearch = useRef((query) => onSearch(query)).current;
+  // ✅ debounced search function
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((query) => {
+        onSearch(query);
+      }, 500),
+    [onSearch]
+  );
 
   useEffect(() => {
-    return () => debouncedSearch.cancel();
+    return () => {
+      debouncedSearch.cancel();
+    };
   }, [debouncedSearch]);
 
   const handleSearchChange = (event) => {

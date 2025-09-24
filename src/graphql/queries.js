@@ -91,38 +91,40 @@ export const GET_LABELS = gql`
 export const GET_NOTES_BY_LABEL_ID = gql`
   query GetNotesByLabelId($labelId: Float!) {
     getNotesByLabelId(labelId: $labelId) {
-      id
-      user_id
-      title
-      description
-      bg_color
-      bg_image
-      is_archived
-      archived_at
-      is_edited
-      edited_at
-      is_reminder
-      reminder_at
-      latitude
-      longitude
-      deleted_at
-      created_at
-      updated_at
-      files {
+      notes {
         id
-        ref_id
-        type
-        url
+        user_id
+        title
+        description
+        bg_color
+        bg_image
+        is_archived
+        archived_at
+        is_edited
+        edited_at
+        is_reminder
+        reminder_at
+        latitude
+        longitude
+        deleted_at
         created_at
+        updated_at
+        files {
+          id
+          ref_id
+          type
+          url
+          created_at
+        }
+        noteLabels {
+          id
+          note_id
+          label_id
+          created_at
+          labelName
+        }
+        labelNames
       }
-      noteLabels {
-        id
-        note_id
-        label_id
-        created_at
-        labelName
-      }
-      labelNames
     }
   }
 `;

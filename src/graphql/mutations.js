@@ -101,3 +101,27 @@ export const ASSIGN_LABEL = gql`
     }
   }
 `;
+
+
+export const REMOVE_BG_FROM_NOTE = gql`
+  mutation RemoveBgFromNote($noteId: Float!) {
+    removeBgFromNote(noteId: $noteId) {
+      success
+      message
+      timestamp
+      data
+    }
+  }
+`;
+
+
+export const REMOVE_IMAGE_FROM_NOTE = gql`
+  mutation RemoveImageFromNote($noteId: Float!, $fileId: Float!) {
+    removeImageFromNote(noteId: $noteId, fileId: $fileId) {
+      success
+      message
+      timestamp
+      data
+    }
+  }
+`;

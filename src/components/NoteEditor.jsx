@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -9,55 +9,46 @@ import {
   Button,
   Tooltip,
   Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
   Chip,
-  FormControl,
-  InputLabel,
-  Select,
-  OutlinedInput,
-  Checkbox,
-  FormControlLabel,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Close as CloseIcon,
   PushPin as PinIcon,
-  ArchiveOutlined as ArchiveIcon,
   DeleteOutlined as DeleteIcon,
   LabelOutlined as LabelIcon,
-  AccessTime as ReminderIcon,
   Palette as ColorIcon,
   Image as ImageIcon,
   PersonAdd as PersonAddIcon,
   MoreOutlined as MoreIcon,
-  CheckBox as CheckBoxIcon,
-  FormatBold as BoldIcon,
-  FormatItalic as ItalicIcon,
-  FormatListBulleted as BulletListIcon,
-  FormatListNumbered as NumberedListIcon,
-} from '@mui/icons-material';
-import { CREATE_NOTE, UPDATE_NOTE, DELETE_OR_RESTORE_NOTE } from '../graphql/mutations';
-import { GET_NOTES } from '../graphql/queries';
-import { useMutation } from '@apollo/client/react';
+} from "@mui/icons-material";
+import {
+  CREATE_NOTE,
+  UPDATE_NOTE,
+  DELETE_OR_RESTORE_NOTE,
+  REMOVE_BG_FROM_NOTE,
+  REMOVE_IMAGE_FROM_NOTE,
+} from "../graphql/mutations";
+import { GET_NOTES } from "../graphql/queries";
+import { useMutation } from "@apollo/client/react";
 
 const NoteEditor = ({ open, onClose, note, onSave }) => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [bgColor, setBgColor] = useState('#ffffff');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [bgColor, setBgColor] = useState("#ffffff");
   const [isPinned, setIsPinned] = useState(false);
   const [isArchived, setIsArchived] = useState(false);
-  const [reminderDate, setReminderDate] = useState('');
-  const [reminderTime, setReminderTime] = useState('');
+  const [reminderDate, setReminderDate] = useState("");
+  const [reminderTime, setReminderTime] = useState("");
   const [labels, setLabels] = useState([]);
-  const [newLabel, setNewLabel] = useState('');
+  const [newLabel, setNewLabel] = useState("");
   const [colorAnchorEl, setColorAnchorEl] = useState(null);
   const [labelAnchorEl, setLabelAnchorEl] = useState(null);
   const [bgImageFile, setBgImageFile] = useState(null);
   const [bgImagePreview, setBgImagePreview] = useState(null);
   const [imagesFiles, setImagesFiles] = useState([]);
   const [imagesPreviews, setImagesPreviews] = useState([]);
+  const [fullScreenImage, setFullScreenImage] = useState(null); // full-screen image state
 
   const [createNote] = useMutation(CREATE_NOTE, {
     refetchQueries: [{ query: GET_NOTES }],
@@ -68,34 +59,35 @@ const NoteEditor = ({ open, onClose, note, onSave }) => {
   const [deleteOrRestoreNote] = useMutation(DELETE_OR_RESTORE_NOTE, {
     refetchQueries: [{ query: GET_NOTES }],
   });
+  const [removeImageFromNote] = useMutation(REMOVE_IMAGE_FROM_NOTE, {
+    refetchQueries: [{ query: GET_NOTES }],
+  });
 
   useEffect(() => {
     if (note) {
-      setTitle(note.title || '');
-      setDescription(note.description || '');
-      setBgColor(note.bg_color || '#ffffff');
+      setTitle(note.title || "");
+      setDescription(note.description || "");
+      setBgColor(note.bg_color || "#ffffff");
       setIsPinned(note.is_pinned || false);
       setIsArchived(note.is_archived || false);
       setLabels(note.labelNames || []);
-      // if (note.reminder_at) {
-        const reminder = new Date(note.reminder_at);
-        setReminderDate(reminder.toISOString().split('T')[0]);
-        setReminderTime(reminder.toTimeString().slice(0, 5));
-      // }
+      const reminder = new Date(note.reminder_at);
+      setReminderDate(reminder.toISOString().split("T")[0]);
+      setReminderTime(reminder.toTimeString().slice(0, 5));
       setBgImagePreview(note.bg_image || null);
       const existingImages = (note.files || [])
-        .filter((f) => f.type === 'image')
+        .filter((f) => f.type === "image")
         .map((f) => f.url);
       setImagesPreviews(existingImages);
     } else {
-      setTitle('');
-      setDescription('');
-      setBgColor('#ffffff');
+      setTitle("");
+      setDescription("");
+      setBgColor("#ffffff");
       setIsPinned(false);
       setIsArchived(false);
       setLabels([]);
-      setReminderDate('');
-      setReminderTime('');
+      setReminderDate("");
+      setReminderTime("");
       setBgImageFile(null);
       setBgImagePreview(null);
       setImagesFiles([]);
@@ -111,9 +103,10 @@ const NoteEditor = ({ open, onClose, note, onSave }) => {
         bg_color: bgColor,
         is_archived: isArchived,
         is_reminder: !!reminderDate,
-        reminder_at: reminderDate && reminderTime 
-          ? new Date(`${reminderDate}T${reminderTime}`).toISOString()
-          : null,
+        reminder_at:
+          reminderDate && reminderTime
+            ? new Date(`${reminderDate}T${reminderTime}`).toISOString()
+            : null,
       };
 
       if (note) {
@@ -138,7 +131,7 @@ const NoteEditor = ({ open, onClose, note, onSave }) => {
       onSave?.();
       onClose();
     } catch (error) {
-      console.error('Error saving note:', error);
+      console.error("Error saving note:", error);
     }
   };
 
@@ -146,13 +139,11 @@ const NoteEditor = ({ open, onClose, note, onSave }) => {
     if (note) {
       try {
         await deleteOrRestoreNote({
-          variables: {
-            noteId: parseFloat(note.id),
-          },
+          variables: { noteId: parseFloat(note.id) },
         });
         onClose();
       } catch (error) {
-        console.error('Error deleting note:', error);
+        console.error("Error deleting note:", error);
       }
     }
   };
@@ -165,322 +156,414 @@ const NoteEditor = ({ open, onClose, note, onSave }) => {
   const handleLabelAdd = () => {
     if (newLabel.trim() && !labels.includes(newLabel.trim())) {
       setLabels([...labels, newLabel.trim()]);
-      setNewLabel('');
+      setNewLabel("");
     }
     setLabelAnchorEl(null);
   };
 
   const handleLabelRemove = (labelToRemove) => {
-    setLabels(labels.filter(label => label !== labelToRemove));
+    setLabels(labels.filter((label) => label !== labelToRemove));
   };
 
+  const [removeBgFromNote] = useMutation(REMOVE_BG_FROM_NOTE, {
+    refetchQueries: [{ query: GET_NOTES }],
+  });
+
   const colors = [
-    '#ffffff', '#f28b82', '#fbbc04', '#fff475', '#ccff90',
-    '#a7ffeb', '#cbf0f8', '#aecbfa', '#d7aefb', '#fdcfe8',
-    '#e6e9ed', '#e8eaed', '#fce8e6', '#fce4ec', '#f3e5f5',
+    "#ffffff",
+    "#f28b82",
+    "#fbbc04",
+    "#fff475",
+    "#ccff90",
+    "#a7ffeb",
+    "#cbf0f8",
+    "#aecbfa",
+    "#d7aefb",
+    "#fdcfe8",
+    "#e6e9ed",
+    "#e8eaed",
+    "#fce8e6",
+    "#fce4ec",
+    "#f3e5f5",
   ];
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-      PaperProps={{
-        sx: {
-          backgroundColor: bgColor,
-          borderRadius: 2,
-          minHeight: 200,
-        },
-      }}
-    >
-      <DialogTitle sx={{ pb: 1 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Typography variant="h6">
-            {note ? 'Edit note' : 'Take a note...'}
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Tooltip title="Pin note">
-              <IconButton
-                size="small"
-                onClick={() => setIsPinned(!isPinned)}
-                color={isPinned ? 'primary' : 'default'}
-              >
-                <PinIcon />
-              </IconButton>
-            </Tooltip>
-            <IconButton size="small" onClick={onClose}>
-              <CloseIcon />
-            </IconButton>
-          </Box>
-        </Box>
-      </DialogTitle>
-
-      <DialogContent sx={{ pt: 0 }}>
-        <TextField
-          fullWidth
-          placeholder="Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          variant="standard"
-          InputProps={{
-            disableUnderline: true,
-            sx: { fontSize: '1.1rem', fontWeight: 500 },
-          }}
-          sx={{ mb: 2 }}
-        />
-
-        <TextField
-          fullWidth
-          placeholder="Take a note..."
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          multiline
-          rows={6}
-          variant="standard"
-          InputProps={{
-            disableUnderline: true,
-          }}
-          sx={{ mb: 2 }}
-        />
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-           {/* <Tooltip title="Add reminder" >
-            <IconButton size="small">
-              <ReminderIcon />
-            </IconButton>
-          </Tooltip> */}
-
-          <Tooltip title="Collaborator">
-            <IconButton size="small">
-              <PersonAddIcon />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title="Add background image">
-            <label htmlFor="note-bg-image-upload">
-              <input
-                id="note-bg-image-upload"
-                type="file"
-                accept="image/*"
-                style={{ display: 'none' }}
-                onChange={e => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    setBgImageFile(file);
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                      setBgImagePreview(reader.result);
-                    };
-                    reader.readAsDataURL(file);
-                  }
-                }}
-              />
-              <IconButton size="small" component="span">
-                <ImageIcon />
-              </IconButton>
-            </label>
-          </Tooltip>
-
-          <Tooltip title="Add images">
-            <label htmlFor="note-images-upload">
-              <input
-                id="note-images-upload"
-                type="file"
-                accept="image/*"
-                multiple
-                style={{ display: 'none' }}
-                onChange={e => {
-                  const files = Array.from(e.target.files || []);
-                  if (files.length) {
-                    setImagesFiles(prev => [...prev, ...files]);
-                    files.forEach((file) => {
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                        setImagesPreviews(prev => [...prev, reader.result]);
-                      };
-                      reader.readAsDataURL(file);
-                    });
-                  }
-                }}
-              />
-              <IconButton size="small" component="span">
-                <ImageIcon />
-              </IconButton>
-            </label>
-          </Tooltip>
-
-          <Tooltip title="Add label">
-            <IconButton
-              size="small"
-              onClick={(e) => setLabelAnchorEl(e.currentTarget)}
-            >
-              <LabelIcon />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title="Change color">
-            <IconButton
-              size="small"
-              onClick={(e) => setColorAnchorEl(e.currentTarget)}
-            >
-              <ColorIcon />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title="More options">
-            <IconButton size="small">
-              <MoreIcon />
-            </IconButton>
-          </Tooltip>
-        </Box>
-
-        {bgImagePreview && (
-          <Box sx={{ mb: 2, textAlign: 'center' }}>
-            <img src={bgImagePreview} alt="Background" style={{ width: '100%', maxHeight: 220, objectFit: 'cover', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }} />
-            <Button color="error" size="small" onClick={() => { setBgImageFile(null); setBgImagePreview(null); }} sx={{ mt: 1 }}>Remove background</Button>
-          </Box>
-        )}
-
-        {imagesPreviews.length > 0 && (
-          <Box sx={{ mb: 2, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 1 }}>
-            {imagesPreviews.map((src, idx) => (
-              <Box key={idx} sx={{ position: 'relative' }}>
-                <img src={src} alt={`Attachment ${idx + 1}`} style={{ width: '100%', height: 120, objectFit: 'cover', borderRadius: 6, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }} />
-                <Button
-                  color="error"
+    <>
+      <Dialog
+        open={open}
+        onClose={onClose}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            minHeight: 200,
+            backgroundColor: bgImagePreview ? "transparent" : bgColor,
+            backgroundImage: bgImagePreview ? `url(${bgImagePreview})` : "none",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          },
+        }}
+      >
+        <DialogTitle sx={{ pb: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Typography variant="h6">
+              {note ? "Edit note" : "Take a note..."}
+            </Typography>
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <Tooltip title="Pin note">
+                <IconButton
                   size="small"
-                  onClick={() => {
-                    setImagesPreviews(prev => prev.filter((_, i) => i !== idx));
-                    setImagesFiles(prev => prev.filter((_, i) => i !== idx));
-                  }}
-                  sx={{ mt: 0.5 }}
+                  onClick={() => setIsPinned(!isPinned)}
+                  color={isPinned ? "primary" : "default"}
                 >
-                  Remove
-                </Button>
-              </Box>
-            ))}
+                  <PinIcon />
+                </IconButton>
+              </Tooltip>
+              <IconButton size="small" onClick={onClose}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
           </Box>
-        )}
+        </DialogTitle>
 
-        {labels.length > 0 && (
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 2 }}>
-            {labels.map((label, index) => (
-              <Chip
-                key={index}
-                label={label}
-                size="small"
-                onDelete={() => handleLabelRemove(label)}
-                sx={{ backgroundColor: 'rgba(0,0,0,0.1)' }}
-              />
-            ))}
-          </Box>
-        )}
-
-        {reminderDate && (
-          <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-            <TextField
-              type="date"
-              size="small"
-              value={reminderDate}
-              onChange={(e) => setReminderDate(e.target.value)}
-              sx={{ flex: 1 }}
-            />
-            <TextField
-              type="time"
-              size="small"
-              value={reminderTime}
-              onChange={(e) => setReminderTime(e.target.value)}
-              sx={{ flex: 1 }}
-            />
-          </Box>
-        )}
-
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-          <Box>
-            {note && (
-              <Button
-                color="error"
-                onClick={handleDelete}
-                startIcon={<DeleteIcon />}
-              >
-                Delete
-              </Button>
-            )}
-          </Box>
-          <Box>
-            <Button onClick={onClose} sx={{ mr: 1 }}>
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
-              onClick={handleSave}
-              disabled={!description.trim()}
-            >
-              {note ? 'Save' : 'Save'}
-            </Button>
-          </Box>
-        </Box>
-      </DialogContent>
-
-      {/* Color Selection Menu */}
-      <Menu
-        anchorEl={colorAnchorEl}
-        open={Boolean(colorAnchorEl)}
-        onClose={() => setColorAnchorEl(null)}
-      >
-        <Box sx={{ p: 1, display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 1 }}>
-          {colors.map((color) => (
-            <Box
-              key={color}
-              onClick={() => handleColorChange(color)}
-              sx={{
-                width: 30,
-                height: 30,
-                backgroundColor: color,
-                borderRadius: '50%',
-                cursor: 'pointer',
-                border: color === bgColor ? '2px solid #000' : '2px solid transparent',
-                '&:hover': {
-                  transform: 'scale(1.1)',
-                },
-              }}
-            />
-          ))}
-        </Box>
-      </Menu>
-
-      {/* Label Addition Menu */}
-      <Menu
-        anchorEl={labelAnchorEl}
-        open={Boolean(labelAnchorEl)}
-        onClose={() => setLabelAnchorEl(null)}
-      >
-        <Box sx={{ p: 2, minWidth: 200 }}>
+        <DialogContent sx={{ pt: 0 }}>
           <TextField
             fullWidth
-            size="small"
-            placeholder="Label name"
-            value={newLabel}
-            onChange={(e) => setNewLabel(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter') {
-                handleLabelAdd();
-              }
+            placeholder="Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            variant="standard"
+            InputProps={{
+              disableUnderline: true,
+              sx: { fontSize: "1.1rem", fontWeight: 500 },
             }}
+            sx={{ mb: 2 }}
           />
-          <Button
+
+          <TextField
             fullWidth
-            variant="contained"
-            onClick={handleLabelAdd}
-            sx={{ mt: 1 }}
-            disabled={!newLabel.trim()}
+            placeholder="Take a note..."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            multiline
+            rows={6}
+            variant="standard"
+            InputProps={{ disableUnderline: true }}
+            sx={{ mb: 2 }}
+          />
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+            <Tooltip title="Collaborator">
+              <IconButton size="small">
+                <PersonAddIcon />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title="Add background image">
+              <label htmlFor="note-bg-image-upload">
+                <input
+                  id="note-bg-image-upload"
+                  type="file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      setBgImageFile(file);
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setBgImagePreview(reader.result);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+                <IconButton size="small" component="span">
+                  <ImageIcon />
+                </IconButton>
+              </label>
+            </Tooltip>
+
+            {bgImagePreview && (
+              <Button
+                color="error"
+                size="small"
+                onClick={async () => {
+                  if (note?.id) {
+                    try {
+                      await removeBgFromNote({
+                        variables: { noteId: parseFloat(note.id) },
+                      });
+                      setBgImageFile(null);
+                      setBgImagePreview(null);
+                    } catch (error) {
+                      console.error("Error removing background:", error);
+                    }
+                  }
+                }}
+              >
+                Remove Background
+              </Button>
+            )}
+
+            <Tooltip title="Add images">
+              <label htmlFor="note-images-upload">
+                <input
+                  id="note-images-upload"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  style={{ display: "none" }}
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    if (files.length) {
+                      setImagesFiles((prev) => [...prev, ...files]);
+                      files.forEach((file) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () =>
+                          setImagesPreviews((prev) => [...prev, reader.result]);
+                        reader.readAsDataURL(file);
+                      });
+                    }
+                  }}
+                />
+                <IconButton size="small" component="span">
+                  <ImageIcon />
+                </IconButton>
+              </label>
+            </Tooltip>
+
+            <Tooltip title="Add label">
+              <IconButton
+                size="small"
+                onClick={(e) => setLabelAnchorEl(e.currentTarget)}
+              >
+                <LabelIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Change color">
+              <IconButton
+                size="small"
+                onClick={(e) => setColorAnchorEl(e.currentTarget)}
+              >
+                <ColorIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="More options">
+              <IconButton size="small">
+                <MoreIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
+
+          {/* Images Grid */}
+          {imagesPreviews.length > 0 && (
+            <Box
+              sx={{
+                mb: 2,
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
+                gap: 1,
+              }}
+            >
+              {imagesPreviews.map((src, idx) => (
+                <Box key={idx} sx={{ position: "relative" }}>
+                  <img
+                    src={src}
+                    alt={`Attachment ${idx + 1}`}
+                    style={{
+                      width: "100%",
+                      height: 120,
+                      objectFit: "cover",
+                      borderRadius: 6,
+                      cursor: "pointer",
+                    }}
+                    onClick={() => setFullScreenImage(src)}
+                  />
+                  <Button
+                    color="error"
+                    size="small"
+                    onClick={async () => {
+                      try {
+                        if (note?.id && note.files?.[idx]?.id) {
+                          // Remove from backend
+                          await removeImageFromNote({
+                            variables: {
+                              noteId: parseInt(note.id),
+                              fileId: parseInt(note.files[idx].id),
+                            },
+                          });
+                        }
+
+                        // Remove from local preview/state
+                        setImagesPreviews((prev) =>
+                          prev.filter((_, i) => i !== idx)
+                        );
+                        setImagesFiles((prev) =>
+                          prev.filter((_, i) => i !== idx)
+                        );
+                      } catch (error) {
+                        console.error("Error removing image:", error);
+                      }
+                    }}
+                    sx={{ mt: 0.5 }}
+                  >
+                    Remove
+                  </Button>
+                </Box>
+              ))}
+            </Box>
+          )}
+
+          {/* Labels */}
+          {labels.length > 0 && (
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mb: 2 }}>
+              {labels.map((label, index) => (
+                <Chip
+                  key={index}
+                  label={label}
+                  size="small"
+                  onDelete={() => handleLabelRemove(label)}
+                  sx={{ backgroundColor: "rgba(0,0,0,0.1)" }}
+                />
+              ))}
+            </Box>
+          )}
+
+          {/* Reminder */}
+          {reminderDate && (
+            <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+              <TextField
+                type="date"
+                size="small"
+                value={reminderDate}
+                onChange={(e) => setReminderDate(e.target.value)}
+                sx={{ flex: 1 }}
+              />
+              <TextField
+                type="time"
+                size="small"
+                value={reminderTime}
+                onChange={(e) => setReminderTime(e.target.value)}
+                sx={{ flex: 1 }}
+              />
+            </Box>
+          )}
+
+          {/* Footer Buttons */}
+          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+            <Box>
+              {note && (
+                <Button
+                  color="error"
+                  onClick={handleDelete}
+                  startIcon={<DeleteIcon />}
+                >
+                  Delete
+                </Button>
+              )}
+            </Box>
+            <Box>
+              <Button onClick={onClose} sx={{ mr: 1 }}>
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                onClick={handleSave}
+                disabled={!description.trim()}
+              >
+                Save
+              </Button>
+            </Box>
+          </Box>
+        </DialogContent>
+
+        {/* Color Menu */}
+        <Menu
+          anchorEl={colorAnchorEl}
+          open={Boolean(colorAnchorEl)}
+          onClose={() => setColorAnchorEl(null)}
+        >
+          <Box
+            sx={{
+              p: 1,
+              display: "grid",
+              gridTemplateColumns: "repeat(5, 1fr)",
+              gap: 1,
+            }}
           >
-            Add Label
-          </Button>
-        </Box>
-      </Menu>
-    </Dialog>
+            {colors.map((color) => (
+              <Box
+                key={color}
+                onClick={() => handleColorChange(color)}
+                sx={{
+                  width: 30,
+                  height: 30,
+                  backgroundColor: color,
+                  borderRadius: "50%",
+                  cursor: "pointer",
+                  border:
+                    color === bgColor
+                      ? "2px solid #000"
+                      : "2px solid transparent",
+                  "&:hover": { transform: "scale(1.1)" },
+                }}
+              />
+            ))}
+          </Box>
+        </Menu>
+
+        {/* Label Menu */}
+        <Menu
+          anchorEl={labelAnchorEl}
+          open={Boolean(labelAnchorEl)}
+          onClose={() => setLabelAnchorEl(null)}
+        >
+          <Box sx={{ p: 2, minWidth: 200 }}>
+            <TextField
+              fullWidth
+              size="small"
+              placeholder="Label name"
+              value={newLabel}
+              onChange={(e) => setNewLabel(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === "Enter") handleLabelAdd();
+              }}
+            />
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={handleLabelAdd}
+              sx={{ mt: 1 }}
+              disabled={!newLabel.trim()}
+            >
+              Add Label
+            </Button>
+          </Box>
+        </Menu>
+      </Dialog>
+
+      {/* Full Screen Image Dialog */}
+      <Dialog
+        open={Boolean(fullScreenImage)}
+        onClose={() => setFullScreenImage(null)}
+        maxWidth="xl"
+        PaperProps={{ sx: { background: "transparent", boxShadow: "none" } }}
+      >
+        <img
+          src={fullScreenImage}
+          alt="Full Screen"
+          style={{ maxHeight: "90vh", maxWidth: "90vw", objectFit: "contain" }}
+        />
+      </Dialog>
+    </>
   );
 };
 
